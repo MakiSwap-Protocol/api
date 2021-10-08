@@ -1,0 +1,40 @@
+{
+  "name": "functions",
+  "description": "REST API for Sendwyre integration",
+  "scripts": {
+    "start": "npm run shell",
+    "lint": "eslint ."
+  },
+  "engines": {
+    "node": "10"
+  },
+  "main": "index.js",
+  "dependencies": {
+    "axios": "^0.19.0",
+    "blockcypher": "^0.2.0",
+    "body-parser": "^1.19.0",
+    "build-url": "^6.0.1",
+    "busboy": "^0.3.1",
+    "cors": "^2.8.5",
+    "crypto": "^1.0.1",
+    "crypto-js": "^3.1.9-1",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "form-data": "^3.0.0",
+    "fs": "0.0.1-security",
+    "multer": "^1.4.2",
+    "os": "^0.1.1",
+    "path": "^0.12.7",
+    "querystring": "^0.2.0",
+    "request": "^2.88.2",
+    "request-promise": "^4.2.6",
+    "url": "^0.11.0"
+  },
+  "devDependencies": {
+    "babel-eslint": "^10.1.0",
+    "eslint": "^5.12.0",
+    "eslint-plugin-promise": "^4.0.1",
+    "typescript": "^3.8.0"
+  },
+  "private": true
+}
