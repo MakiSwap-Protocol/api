@@ -49,45 +49,45 @@ plugins:
   - serverless-content-encoding
 
 functions:
-  v1-summary:
+  summary:
     handler: src/v1/summary.handler
     events:
       - http:
           method: get
-          path: /v1/summary
+          path: /summary
           private: true
           caching:
             enabled: true
             ttlInSeconds: 900
 
-  v1-tickers:
+  tickers:
     handler: src/v1/tickers.handler
     events:
       - http:
           method: get
-          path: /v1/tickers
+          path: /tickers
           private: true
           caching:
             enabled: true
             ttlInSeconds: 60
 
-  v1-assets:
+  assets:
     handler: src/v1/assets.handler
     events:
       - http:
           method: get
-          path: /v1/assets
+          path: /assets
           private: true
           caching:
             enabled: true
             ttlInSeconds: 3600
 
-  v1-orderbook:
+  orderbook:
     handler: src/v1/orderbook.handler
     events:
       - http:
           method: get
-          path: "/v1/orderbook/{pair}"
+          path: "/orderbook/{pair}"
           private: true
           caching:
             enabled: true
@@ -95,72 +95,12 @@ functions:
               - name: request.path.pair
             ttlInSeconds: 3600
 
-
-  v1-trades:
+  trades:
     handler: src/v1/trades.handler
     events:
       - http:
           method: get
-          path: "/v1/trades/{pair}"
-          private: true
-          caching:
-            enabled: true
-            cacheKeyParameters:
-              - name: request.path.pair
-            ttlInSeconds: 900
-
-  v2-summary:
-    handler: src/v2/summary.handler
-    events:
-      - http:
-          method: get
-          path: /v2/summary
-          private: true
-          caching:
-            enabled: true
-            ttlInSeconds: 900
-
-  v2-tickers:
-    handler: src/v2/tickers.handler
-    events:
-      - http:
-          method: get
-          path: /v2/tickers
-          private: true
-          caching:
-            enabled: true
-            ttlInSeconds: 60
-
-  v2-assets:
-    handler: src/v2/assets.handler
-    events:
-      - http:
-          method: get
-          path: /v2/assets
-          private: true
-          caching:
-            enabled: true
-            ttlInSeconds: 3600
-
-  v2-orderbook:
-    handler: src/v2/orderbook.handler
-    events:
-      - http:
-          method: get
-          path: "/v2/orderbook/{pair}"
-          private: true
-          caching:
-            enabled: true
-            cacheKeyParameters:
-              - name: request.path.pair
-            ttlInSeconds: 3600
-
-  v2-trades:
-    handler: src/v2/trades.handler
-    events:
-      - http:
-          method: get
-          path: "/v2/trades/{pair}"
+          path: "/trades/{pair}"
           private: true
           caching:
             enabled: true

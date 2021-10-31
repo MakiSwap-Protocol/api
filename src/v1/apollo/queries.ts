@@ -1,70 +1,76 @@
 import gql from 'graphql-tag'
 
-export const TOP_PAIRS = gql`
-  query _($limit: Int!) {
-    exchanges(first: $limit, orderBy: ethBalance, orderDirection: desc) {
-      tokenAddress
-      tokenSymbol
-      tokenName
+export const PAIRS_VOLUME_QUERY = gql`
+  query PairsVolume($limit: Int!, $pairIds: [ID!]!, $blockNumber: Int!) {
+    pairVolumes: pairs(first: $limit, where: { id_in: $pairIds }, block: { number: $blockNumber }) {
       id
+      volumeToken0
+      volumeToken1
     }
   }
 `
 
-export const TOP_PAIRS_DATA = gql`
-  query _($exchangeAddress: String!, $timestamp: Int!) {
-    exchanges(where: { id: $exchangeAddress }) {
-      price
-      tradeVolumeEth
-      tradeVolumeToken
-    }
+// gets the top 1k pairs by USD reserves
+export const TOP_PAIRS = gql`
+  fragment TokenInfo on Token {
+    id
+    symbol
+    name
+  }
 
-    exchangeHistoricalDatas(
-      where: { exchangeAddress: $exchangeAddress, timestamp_lte: $timestamp }
-      first: 1
-      orderBy: timestamp
+  query TopPairs($limit: Int!, $excludeTokenIds: [String!]!) {
+    pairs(
+      first: $limit
+      orderBy: reserveUSD
       orderDirection: desc
+      where: { token0_not_in: $excludeTokenIds, token1_not_in: $excludeTokenIds }
     ) {
-      tradeVolumeEth
-      tradeVolumeToken
+      id
+      token0 {
+        ...TokenInfo
+      }
+      token1 {
+        ...TokenInfo
+      }
+      reserve0
+      reserve1
+      volumeToken0
+      volumeToken1
     }
   }
 `
 
-export const ORDERBOOK = gql`
-  query _($exchangeAddress: String!) {
-    exchangeHistoricalDatas(
-      first: 1
-      where: { exchangeAddress: $exchangeAddress }
-      orderBy: timestamp
-      orderDirection: desc
-    ) {
-      timestamp
-      ethBalance
-      tokenBalance
+export const PAIR_RESERVES_BY_TOKENS = gql`
+  query PairReserves($token0: String!, $token1: String!) {
+    pairs(where: { token0: $token0, token1: $token1 }) {
+      reserve0
+      reserve1
     }
   }
 `
 
-export const TRANSACTIONS = gql`
-  query _($skip: Int!, $exchangeAddress: String!, $timestamp: Int!) {
-    transactions(
+export const SWAPS_BY_PAIR = gql`
+  query SwapsByPair($skip: Int!, $timestamp: BigInt!, $pairAddress: String!) {
+    swaps(
       skip: $skip
-      where: { exchangeAddress: $exchangeAddress, timestamp_gte: $timestamp }
+      where: { timestamp_gte: $timestamp, pair: $pairAddress }
       orderBy: timestamp
       orderDirection: asc
     ) {
+      id
       timestamp
-      ethPurchaseEvents {
-        id
-        ethAmount
-        tokenAmount
-      }
-      tokenPurchaseEvents {
-        id
-        ethAmount
-        tokenAmount
-      }
+      amount0In
+      amount0Out
+      amount1In
+      amount1Out
+    }
+  }
+`
+
+export const PAIR_FROM_TOKENS = gql`
+  query SwapsByTokens($token0: String!, $token1: String!) {
+    pairs(where: { token0: $token0, token1: $token1 }) {
+      id
     }
   }
 `

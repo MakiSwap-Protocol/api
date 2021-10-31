@@ -1,30 +1,34 @@
+import { getAddress } from '@ethersproject/address'
 import { APIGatewayProxyHandler } from 'aws-lambda'
 
-import { getTopPairs } from './_shared'
+import { getTopPairs, Pair } from './_shared'
 import { createSuccessResponse, createServerErrorResponse } from '../utils/response'
 
+interface ReturnShape {
+  [tokenAddress: string]: { id: string; name: string; symbol: string; maker_fee: '0'; taker_fee: '0.003' }
+}
+
 export const handler: APIGatewayProxyHandler = async () => {
-  return await getTopPairs()
-    .then(topPairs =>
-      createSuccessResponse({
-        ETH: {
-          name: 'Ether',
-          symbol: 'ETH',
-          id: 'ETH',
+  try {
+    const pairs = await getTopPairs()
+    const tokens = pairs.reduce<{
+      [tokenAddress: string]: { id: string; name: string; symbol: string; maker_fee: '0'; taker_fee: '0.003' }
+    }>((memo: ReturnShape, pair: Pair): ReturnShape => {
+      for (let token of [pair.token0, pair.token1]) {
+        const id = getAddress(token.id)
+        if (memo[id]) continue
+        memo[id] = {
+          id,
+          name: token.name,
+          symbol: token.symbol,
           maker_fee: '0',
           taker_fee: '0.003'
-        },
-        ...topPairs.reduce((accumulator: any, pair): any => {
-          accumulator[pair.tokenAddress] = {
-            ...(pair.tokenName ? { name: pair.tokenName } : {}),
-            ...(pair.tokenSymbol ? { symbol: pair.tokenSymbol } : {}),
-            id: pair.exchangeAddress,
-            maker_fee: '0',
-            taker_fee: '0.003'
-          }
-          return accumulator
-        }, {})
-      })
-    )
-    .catch(error => createServerErrorResponse(error))
+        }
+      }
+      return memo
+    }, {})
+    return createSuccessResponse(tokens)
+  } catch (error) {
+    return createServerErrorResponse(error)
+  }
 }
