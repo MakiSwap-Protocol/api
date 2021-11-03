@@ -1,5 +1,5 @@
 service:
-  name: uniswap-api-auth
+  name: makiswap-api-auth
 
 frameworkVersion: ">=1.75.1 <2.0.0"
 
@@ -38,7 +38,7 @@ custom:
   # Enable or disable caching globally
   apiGatewayCaching:
     enabled: true
-    clusterSize: '0.5' # defaults to '0.5'
+    clusterSize: "0.5" # defaults to '0.5'
     ttlInSeconds: 300 # defaults to the maximum allowed: 3600
   contentEncoding:
     minimumCompressionSize: 0 # Minimum body size required for compression in bytes
