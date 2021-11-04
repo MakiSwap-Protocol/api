@@ -5,7 +5,7 @@ import fetch from "node-fetch";
 
 export const blockClient = new ApolloClient({
   link: new HttpLink({
-    fetch,
+    fetch: fetch as any,
     uri: "https://n10.hg.network/subgraphs/name/makiblocks/heco",
   }),
   cache: new InMemoryCache(),

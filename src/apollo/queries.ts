@@ -1,14 +1,18 @@
-import gql from 'graphql-tag'
+import gql from "graphql-tag";
 
 export const PAIRS_VOLUME_QUERY = gql`
   query PairsVolume($limit: Int!, $pairIds: [ID!]!, $blockNumber: Int!) {
-    pairVolumes: pairs(first: $limit, where: { id_in: $pairIds }, block: { number: $blockNumber }) {
+    pairVolumes: pairs(
+      first: $limit
+      where: { id_in: $pairIds }
+      block: { number: $blockNumber }
+    ) {
       id
       volumeToken0
       volumeToken1
     }
   }
-`
+`;
 
 // gets the top 1k pairs by USD reserves
 export const TOP_PAIRS = gql`
@@ -23,7 +27,10 @@ export const TOP_PAIRS = gql`
       first: $limit
       orderBy: reserveUSD
       orderDirection: desc
-      where: { token0_not_in: $excludeTokenIds, token1_not_in: $excludeTokenIds }
+      where: {
+        token0_not_in: $excludeTokenIds
+        token1_not_in: $excludeTokenIds
+      }
     ) {
       id
       token0 {
@@ -38,7 +45,7 @@ export const TOP_PAIRS = gql`
       volumeToken1
     }
   }
-`
+`;
 
 export const PAIR_RESERVES_BY_TOKENS = gql`
   query PairReserves($token0: String!, $token1: String!) {
@@ -47,7 +54,7 @@ export const PAIR_RESERVES_BY_TOKENS = gql`
       reserve1
     }
   }
-`
+`;
 
 export const SWAPS_BY_PAIR = gql`
   query SwapsByPair($skip: Int!, $timestamp: BigInt!, $pairAddress: String!) {
@@ -65,7 +72,7 @@ export const SWAPS_BY_PAIR = gql`
       amount1Out
     }
   }
-`
+`;
 
 export const PAIR_FROM_TOKENS = gql`
   query SwapsByTokens($token0: String!, $token1: String!) {
@@ -73,4 +80,15 @@ export const PAIR_FROM_TOKENS = gql`
       id
     }
   }
-`
+`;
+
+export const PAIR_FROM_NAME = gql`
+  query PairFromName($name: String!) {
+    pairs(where: { name: $name }) {
+      id
+      timestamp
+      reserve0
+      reserve1
+    }
+  }
+`;
