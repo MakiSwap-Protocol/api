@@ -89,6 +89,12 @@ export const PAIR_FROM_NAME = gql`
       timestamp
       reserve0
       reserve1
+      token0 {
+        id
+      }
+      token1 {
+        id
+      }
     }
   }
 `;

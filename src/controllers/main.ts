@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import BigNumber from "bignumber.js";
-import { getAllPairs } from "../utils";
+import { getAddress } from "@ethersproject/address";
+import { getAllPairs, getSwaps } from "../utils";
 import { client } from "../apollo/client";
 import { PAIR_FROM_NAME } from "../apollo/queries";
 import { computeBidsAsks } from "../utils/computeBidsAsks";
@@ -77,4 +78,88 @@ const getOrderbook = async (req: Request, res: Response) => {
   return res.status(200).json(pairInfo);
 };
 
-export default { getPairs, getTickers, getOrderbook };
+const getHistoricalTrades = async (req: Request, res: Response) => {
+  const {
+    data: { pairs },
+    errors: error,
+  } = await client.query({
+    query: PAIR_FROM_NAME,
+    variables: {
+      name: req.query.ticker_id?.toString().replace("_", "-"),
+    },
+    fetchPolicy: "cache-first",
+  });
+  if (error && error.length > 0) {
+    return res.status(404).json({
+      error: JSON.stringify(error),
+    });
+  }
+  const swaps = await getSwaps(pairs[0].token0.id, pairs[0].token1.id);
+  const results = swaps.slice(0, Number(req.query.limit)).map((swap) => {
+    const aIn = swap.amountAIn !== "0";
+    const aOut = swap.amountAOut !== "0";
+    const bIn = swap.amountBIn !== "0";
+    const bOut = swap.amountBOut !== "0";
+
+    // a is the base so if the pair sends a and not b then it's a 'buy'
+    const isBuy = aOut && bIn && !aIn && !bOut;
+    const isSell = !aOut && !bIn && aIn && bOut;
+    const isBorrowBoth = aOut && bOut && aIn && bIn;
+
+    const type = isBuy
+      ? "buy"
+      : isSell
+      ? "sell"
+      : isBorrowBoth
+      ? "borrow-both"
+      : "???";
+    const baseAmount = aOut ? swap.amountAOut : swap.amountAIn;
+    const quoteAmount = bOut ? swap.amountBOut : swap.amountBIn;
+    return {
+      trade_id: swap.id,
+      base_volume: baseAmount,
+      target_volume: quoteAmount,
+      type,
+      trade_timestamp: swap.timestamp,
+      price:
+        baseAmount !== "0"
+          ? new BigNumber(quoteAmount)
+              .dividedBy(new BigNumber(baseAmount))
+              .toString()
+          : undefined,
+    };
+  });
+  return res.status(200).json(results);
+};
+
+const getAssets = async (req: Request, res: Response) => {
+  const { pairs, error } = await getAllPairs();
+  if (error) {
+    return res.status(404).json({
+      message: JSON.stringify(error),
+    });
+  }
+  const results = pairs.reduce((memo: any, pair: any) => {
+    for (let token of [pair.token0, pair.token1]) {
+      const id = getAddress(token.id);
+      if (memo[id]) continue;
+      memo[id] = {
+        id,
+        name: token.name,
+        symbol: token.symbol,
+        maker_fee: "0",
+        taker_fee: "0.003",
+      };
+    }
+    return memo;
+  }, {});
+  return res.status(200).json(results);
+};
+
+export default {
+  getPairs,
+  getTickers,
+  getOrderbook,
+  getHistoricalTrades,
+  getAssets,
+};
