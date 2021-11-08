@@ -1,1 +1,1 @@
-eb: node dist/index.js
+eb: node build/index.js
